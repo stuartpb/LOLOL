@@ -84,7 +84,7 @@ function main(web, req)
     lmc.kwd = kwd
     lmc.signed = signed
     -- Don't log valid signatures.
-    if not signed then lmc.sig = sig
+    if not signed then lmc.sig = sig end
 
     mongodb:insert('logs',lmc)
   end --- logging ----
@@ -93,7 +93,7 @@ function main(web, req)
 
   local user = {}
   function user.get(key)
-    if signed and tel~="Simluator" then
+    if signed then
       local cursor = mongodb:query('users', {uid = uid})
       local usertable = cursor:next()
       if not usertable then
@@ -146,60 +146,11 @@ function main(web, req)
   -- Request handling
   else
     -- If this is somehow not a REQ, something's up
-    if act=~"REQ" then
+    if act ~= "REQ" then
       moai.log("Unrecognized action type "..act,"WARN")
     end
 
-    -- Get the given name for this user, if they've given one.
-    local username
-    username = "TextMarks user"
+    --TODO: handle request
 
-    -- empty messages
-    if msg=="" then
-      if not username then
-        respond('Text "LOLOL name" followed by your name!')
-      else
-        respond(atk('Y helo thar, @!',username))
-      end
-
-    -- Other message situations:
-
-    --message starts with "name"
-    elseif msg:find"^name" then
-      local uname=msg:match"^name%s*(.-)$"
-      if uname then
-        if uname:find"\n" then
-          uname=uname:match"^(.-)\n"
-        end
-        if uname:len() > 50 then
-          respond"Holy cow! Let's keep it under 50 characters, OK?"
-        else
-          local response = atk("Hello, @!",uname)
-          user.set("name",uname)
-          if username then
-            response = response .. atk(" You are cooler than @.",username)
-          end
-          respond(response)
-        end
-      else
-        respond("Didn't get a name. "..
-          'Try just a space between "lolol name" and your name.')
-      end
-
-    --message is one of the odd things I intercepted in the original
-    --run off of a laptop at Charlie's
-    elseif msg=="matt stupid" then
-      respond"So I've heard."
-
-    --end of elseifs - default case
-    else
-      --respond with the sent message stripped of punctuation,
-      --wrapped in a spin
-      local response = atk("And @ to you, too",
-        gsub(msg,'^%p*(.-)%p*$',"%1"))
-      if username then response = response..atk(", @",username) end
-      response = response .. '!'
-      respond(response)
-    end
   end
 end
