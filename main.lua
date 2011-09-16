@@ -87,26 +87,6 @@ function main(web, req)
     if not signed then lmc.sig = sig
   end --- logging ----
 
-  ------ User data manipulation functions ------
-  local function get(key)
-    local cursor = mongodb:query('users', {uid = uid})
-    local usertable = cursor:next()
-    if not usertable then
-      --this technically shouldn't happen, but just be chill
-      return nil
-    else
-      return usertable[key]
-    end
-  end
-
-  local function set(key, val)
-    mongodb:update('users', {uid = uid}, {['$set']={[key]=val}}, true)
-  end
-
-  local function unset(key)
-    mongodb:update('users', {uid = uid}, {['$unset']={[key]=1}}, true)
-  end
-
   ------ Local toolbox ------
 
   -- Send the page response.
@@ -114,76 +94,16 @@ function main(web, req)
     web:page(body,200,'OK')
   end
 
-  --Insert a string into another string as indicated by the '@'.
-  local function atk(fmat,kword)
-    return gsub(fmat,'@',kword)
-  end
-
   ------ Action ------
-  -- Save this user's telephone number.
-  set("tel",tel)
 
   -- Subscription handling
   if act=="SUB" then
-    set("subscribed",true)
     respond""
   elseif act=="UNSUB" then
-    unset("subscribed")
     respond""
 
   -- Request handling
   else
-    -- If this is somehow not a REQ, something's up
-    if act=~"REQ" then
-      moai.log("Unrecognized action type "..act,"WARN")
-    end
-
-    -- Get the given name for this user, if they've given one.
-    local username = get("name")
-
-    -- empty messages
-    if msg=="" then
-      if not username then
-        respond('Text "LOLOL name" followed by your name!')
-      else
-        respond(atk('Y helo thar, @!',username))
-      end
-
-    -- Other message situations:
-
-    --message starts with "name"
-    elseif msg:find"^name" then
-      local uname=msg:match"^name%s*(.-)$"
-      if uname then
-        if uname:find"\n" then
-          uname=uname:match"^(.-)\n"
-        end
-        if uname:len() > 50 then
-          respond"Holy cow! Let's keep it under 50 characters, OK?"
-        else
-          set("name",uname)
-          local response = atk("Hello, @!",uname)
-          if username then
-            response = response .. atk(" You are cooler than @.",username)
-          end
-          respond(response)
-        end
-      else
-        respond("Didn't get a name. "..
-        'Try just a space between "lolol name" and your name.')
-      end
-
-    --message is one of the odd things I intercepted in the original
-    --run off of a laptop at Charlie's
-    elseif msg=="matt stupid" then
-      respond"So I've heard."
-
-    --end of elseifs - default case
-    else
-      local response = atk("And @ to you, too",gsub(msg,'^%p*(.-)%p*$',"%1"))
-      if username then response = response..atk(", @",username) end
-      response = response .. '!'
-      respond(response)
-    end
+    respond"Watch this space (text MADAM to 41411 for the old crazy)."
   end
 end
