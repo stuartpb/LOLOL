@@ -123,7 +123,7 @@ function main(web, req)
 
   -- Send the page response.
   local function respond(body)
-    web:page(body,200,'OK')
+    web:page(body,200,'OK',{["content-type"] = "text/plain"})
   end
 
   --Insert a string into another string as indicated by the '@'.
