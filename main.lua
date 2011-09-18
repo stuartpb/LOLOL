@@ -84,14 +84,16 @@ function main(web, req)
     lmc.kwd = kwd
     lmc.signed = signed
     -- Don't log valid signatures.
-    if not signed then lmc.sig = sig
+    if not signed then lmc.sig = sig end
+
+    mongodb:insert('logs',lmc)
   end --- logging ----
 
   ------ Local toolbox ------
 
   -- Send the page response.
   local function respond(body)
-    web:page(body,200,'OK')
+    web:page(body,200,'OK',{["content-type"] = "text/plain"})
   end
 
   ------ Action ------
